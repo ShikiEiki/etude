@@ -35,7 +35,7 @@ publish {
     userOrg = 'shikieiki'//bintray.com用户名
     groupId = 'com.frank'//jcenter上的路径
     artifactId = 'etude'//项目名称
-    publishVersion = '1.1.1'//版本号
+    publishVersion = '1.2.0'//版本号
     desc = 'An android tools kit created by FuHan'//描述
     website = 'https://github.com/shikieiki'//网站，不重要；尽量模拟github上的地址
 }
