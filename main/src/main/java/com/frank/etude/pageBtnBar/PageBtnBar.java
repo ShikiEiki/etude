@@ -57,6 +57,12 @@ public class PageBtnBar extends LinearLayout{
         }
 
         boolean needPerformClick = false;//刷新完成后是否需要自动触发一次当前选中按钮的click事件
+
+        //初始first和lastIndex都为-1时,就一定是超限的,这样做会导
+        if (firstBtnIndex == -1 && lastBtnIndex == -1){
+            toNextScreen();
+        }
+
         if (currentSelectPageIndex == -1
                 || currentSelectPageIndex >= totalPageBtnCount
                 || lastBtnIndex > (totalPageBtnCount - 1)
@@ -73,6 +79,14 @@ public class PageBtnBar extends LinearLayout{
             needPerformClick = true;
         }
 
+        //在firstBtnIndex和lastBtnIndex都没有超限时还需要考虑刷新前按钮个数较少,刷新后按钮个数变多了,这时lastBtnIndex可能太小
+        // ,不能满足一屏显示按钮数量最多是MaxBtnCountPerScreen的要求,需要再对lastBtnIndex进行一次校正.
+        if ((lastBtnIndex - firstBtnIndex + 1) < mPageBarAdapter.getMaxBtnCountPerScreen()){
+            lastBtnIndex = firstBtnIndex + mPageBarAdapter.getMaxBtnCountPerScreen() - 1;
+            if (lastBtnIndex >= mPageBarAdapter.getPageBtnCount()){
+                lastBtnIndex = mPageBarAdapter.getPageBtnCount() - 1;
+            }
+        }
 
         boolean needLastScreenBtn = firstBtnIndex != 0 ? true : false;//是否需要显示向前一页的按钮
         boolean needNextScreenBtn = lastBtnIndex + 1 != totalPageBtnCount ? true : false; //是否需要显示向后一页的按钮
@@ -133,9 +147,9 @@ public class PageBtnBar extends LinearLayout{
                         else {
                             //普通按钮点击逻辑,调用PageBarAdapter中用户的onCLick逻辑,并且更新currentSelectPageIndex为当前点击按钮
                             //并刷新bar
-                            mPageBarAdapter.onPageBtnClick(v , index , (String)((TextView) v).getText());
                             currentSelectPageIndex = index;
                             refreshPageBar();
+                            mPageBarAdapter.onPageBtnClick(v , index , (String)((TextView) v).getText());
                         }
                     }
                 });
