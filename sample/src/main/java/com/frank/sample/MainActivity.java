@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.frank.etude.pageBtnBar.PageBtnBarAdapter;
+import com.frank.etude.pageable.PageBtnBarAdapter;
 import com.frank.sample.databinding.ActivityTestBinding;
 
 /**
@@ -17,6 +17,7 @@ import com.frank.sample.databinding.ActivityTestBinding;
 
 public class MainActivity extends Activity{
     ActivityTestBinding binding;
+    int totalCount = -1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -29,32 +30,51 @@ public class MainActivity extends Activity{
         binding.btnBar.setPageBarAdapter(new PageBtnBarAdapter(getApplicationContext()) {
             @Override
             public int getPageBtnCount() {
-                return 10;
+                return totalCount;
             }
 
             @Override
             public void onPageBtnClick(View btn, int btnIndex, String textInBtn) {
-                Log.v("FH" , "==============================onPageBtnClick " + btnIndex);
+                binding.textview.setText(textInBtn);
+            }
+
+            @Override
+            public void onNoPageToShow() {
+                if (totalCount == -1){
+                    totalCount = 10;
+                    binding.btnBar.refreshPageBar();
+                }
+                else {
+                    binding.textview.setText("nothing!");
+                }
             }
         });
         return binding.getRoot();
     }
 
-    public void onBtn1Click(View view){
-        binding.btnBar.refreshPageBar();
+    public void onBtn1Click(View view)
+    {
+        totalCount = 10;
     }
     public void onBtn2Click(View view){
+        totalCount = 20;
     }
     public void onBtn3Click(View view){
+        totalCount = 30;
     }
     public void onBtn4Click(View view){
+        totalCount = 0;
     }
     public void onBtn5Click(View view){
+        binding.btnBar.refreshPageBar();
     }
     public void onBtn6Click(View view){
+        binding.btnBar.clickPageBtn(10);
     }
     public void onBtn7Click(View view){
+        binding.btnBar.clickPageBtn(15);
     }
     public void onBtn8Click(View view){
+        binding.btnBar.clickPageBtn(16);
     }
 }

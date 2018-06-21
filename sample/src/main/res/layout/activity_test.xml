@@ -37,43 +37,52 @@
                 android:onClick="onBtn4Click"
                 />
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <Button
                 android:id="@+id/btn5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="btn5"
                 android:onClick="onBtn5Click"
-                />
+                android:text="btn5" />
+
             <Button
                 android:id="@+id/btn6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="btn6"
                 android:onClick="onBtn6Click"
-                />
+                android:text="btn6" />
+
             <Button
                 android:id="@+id/btn7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="btn7"
                 android:onClick="onBtn7Click"
-                />
+                android:text="btn7" />
+
             <Button
                 android:id="@+id/btn8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="btn8"
                 android:onClick="onBtn8Click"
-                />
+                android:text="btn8" />
         </LinearLayout>
-        <com.frank.etude.pageBtnBar.PageBtnBar
+
+        <com.frank.etude.pageable.PageBtnBar
             android:id="@+id/btn_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            />
+        <TextView
+            android:id="@+id/textview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="28px"
+            android:textColor="@android:color/black"
             />
         <ImageView
             android:id="@+id/imageview"

@@ -1,4 +1,4 @@
-package com.frank.etude.pageBtnBar;
+package com.frank.etude.pageable;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,6 +12,10 @@ import com.frank.etude.R;
  * Created by FH on 2018/2/28.
  */
 
+/**
+ * PageBtnBar的适配器类,用来为PageBtnBar提供数据.
+ * 使用的时候需要实现其中的抽象方法才能使用.
+ */
 public abstract class PageBtnBarAdapter {
     private Context mContext;
 
@@ -77,4 +81,11 @@ public abstract class PageBtnBarAdapter {
      * @param textInBtn 被按下的按钮的文字
      */
     public abstract void onPageBtnClick(View btn, int btnIndex, String textInBtn);
+
+    /**
+     * refreshPageBtnBar时发现没有一个按钮可以展示,则会回调此方法.
+     */
+    public abstract void onNoPageToShow();
+
+
 }
