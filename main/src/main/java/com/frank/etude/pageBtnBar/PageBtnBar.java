@@ -58,18 +58,9 @@ public class PageBtnBar extends LinearLayout{
 
         boolean needPerformClick = false;//刷新完成后是否需要自动触发一次当前选中按钮的click事件
 
-        //初始first和lastIndex都为-1时,就一定是超限的,这样做会导
-        if (firstBtnIndex == -1 && lastBtnIndex == -1){
-            toNextScreen();
-        }
-
         if (currentSelectPageIndex == -1
-                || currentSelectPageIndex >= totalPageBtnCount
-                || lastBtnIndex > (totalPageBtnCount - 1)
-                || firstBtnIndex > (totalPageBtnCount - 1)
-                || lastBtnIndex < 0
-                || firstBtnIndex < 0){
-            //当前选中按钮超限或firstBtnIndex和lastBtnIndex超限时,将按钮显示变更为第一屏
+                || currentSelectPageIndex >= totalPageBtnCount) {
+            //当前选中按钮超限时,将按钮显示变更为第一屏
             // ,并且将当前选中按钮置为第一屏
             // ,并且计划一次自动点击事件.
             currentSelectPageIndex = 0;
@@ -77,6 +68,15 @@ public class PageBtnBar extends LinearLayout{
             lastBtnIndex = -1;
             toNextScreen();
             needPerformClick = true;
+        }
+        else if (lastBtnIndex > (totalPageBtnCount - 1)
+                || firstBtnIndex > (totalPageBtnCount - 1)
+                || lastBtnIndex < 0
+                || firstBtnIndex < 0) {
+            //当firstBtnIndex和lastBtnIndex超限时,将按钮显示变更为第一屏
+            firstBtnIndex = -1;
+            lastBtnIndex = -1;
+            toNextScreen();
         }
 
         //在firstBtnIndex和lastBtnIndex都没有超限时还需要考虑刷新前按钮个数较少,刷新后按钮个数变多了,这时lastBtnIndex可能太小
