@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 
 /**
  * Created by FH on 2017/10/13.
+ * last modify on 2018/6/22
  * 自动分页的recyclerview
  * 使用说明:
  * 本控件是一个实现了自动分页的recyclerview,会自动在主要负责显示的recyclerview下方添加页码栏.
@@ -100,19 +101,20 @@ public class PageableRecyclerView extends LinearLayout {
             }
 
             @Override
-            public void onPageBtnClick(View view, int i, String s) {
-                recyclerView.getAdapter().notifyDataSetChanged();
-                if (customAdapter != null){
-                    customAdapter.onSelectPageChanged(i);
+            public void onPageBtnClick(View view, int index, String textInPageBtn) {
+                if (customAdapter.isPageDataReady(index)){
+                    customAdapter.notifyDataReady();
+                }
+                else {
+                    customAdapter.preparePageData(index);
                 }
             }
 
             @Override
             public void onNoPageToShow() {
-
+                getRealRcyView().getAdapter().notifyDataSetChanged();
             }
         });
-        pageBtnBar.refreshPageBar();
         LayoutParams pageBtnContainerParam = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         addView(pageBtnBar , pageBtnContainerParam);
     }
@@ -138,12 +140,28 @@ public class PageableRecyclerView extends LinearLayout {
         return this;
     }
 
+    /**
+     *
+     * @param pageIndex
+     */
+    public void showPage(int pageIndex){
+        pageBtnBar.clickPageBtn(pageIndex);
+    }
+
     public void notifyDataSetChanged() {
-        if (customAdapter == null || recyclerView == null){
-            return;
+        if (customAdapter == null){
+            throw new NoAdapterException("没有设置adapter!!!调用notifyDataSetChanged之前必须设置一个adapter");
         }
-        recyclerView.getAdapter().notifyDataSetChanged();
-        pageBtnBar.refreshPageBar();
+        int currentIndex = pageBtnBar.getCurrentSelectPageIndex();
+        if (currentIndex == -1){
+            currentIndex = 0;
+        }
+        if (customAdapter.isPageDataReady(currentIndex)){
+            customAdapter.notifyDataReady();
+        }
+        else {
+            customAdapter.preparePageData(currentIndex);
+        }
     }
 
     public void addItemDecoration(RecyclerView.ItemDecoration decor) {
@@ -154,14 +172,11 @@ public class PageableRecyclerView extends LinearLayout {
         recyclerView.addOnItemTouchListener(listener);
     }
 
-//    public void setCurrentPage(int pageIndex){
-//        pageBtnBar.setCurrentSelectPageIndex(pageIndex);
-//        notifyDataSetChanged();
-//    }
-
     public int getCurrentSelectPageIndex(){
         return pageBtnBar.getCurrentSelectPageIndex();
     }
+
+
 
     public RecyclerView getRealRcyView() {
         return recyclerView;
@@ -178,8 +193,21 @@ public class PageableRecyclerView extends LinearLayout {
         public abstract VH onCreateViewHolder(ViewGroup parent, int viewType);
         public abstract void onBindViewHolder(VH holder, int position);
         public abstract int getItemCount();
-        public void onSelectPageChanged(int changedPageIndex) {
 
+        public abstract boolean isPageDataReady(int pageIndex);
+        public abstract void preparePageData(int pageIndex);
+        public void notifyDataReady(){
+            int currentPageIndex = pageableRecyclerView.pageBtnBar.getCurrentSelectPageIndex();
+            pageableRecyclerView.pageBtnBar.refreshPageBar();
+            if (currentPageIndex == pageableRecyclerView.pageBtnBar.getCurrentSelectPageIndex()){
+                pageableRecyclerView.getRealRcyView().getAdapter().notifyDataSetChanged();
+            }
+        }
+    }
+
+    public class NoAdapterException extends RuntimeException{
+        public NoAdapterException(String message) {
+            super(message);
         }
     }
 }

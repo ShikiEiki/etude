@@ -15,7 +15,7 @@ public class ListUtil {
      * 给定一个列表,和一套比对规则,根据规则逐一的比对列表中的数据,去除列表里所有符合条件的节点,并且返回去除的节点数.
      * <p>比如给定要去除mList中所有id为"test"的节点,则可以如此调用
      *
-     * <p>  conditionalRemove(mList , new ConditionJudger<Node>() {
+     * <p>  conditionalRemove(mList , new ConditionJudger() {
      * <p>      @Override
      * <p>      public boolean isMatchCondition(Node nodeInList) {
      * <p>          return "test".equals(nodeInList.id);
@@ -50,7 +50,7 @@ public class ListUtil {
      * <p>
      * 比如要得到mList中所有content为"test"的节点组成的子列表,可以如此调用:
      *
-     * <p>  List subList = conditionalSubList(mList, new ConditionJudger<Node>() {
+     * <p>  List subList = conditionalSubList(mList, new ConditionJudger() {
      * <p>      @Override
      * <p>      public boolean isMatchCondition(Node nodeInList) {
      * <p>          return nodeInList.content.equals("test");
@@ -81,7 +81,7 @@ public class ListUtil {
      * 例如判断mList中是否有和accordingNode一样id的节点存在,则可以如此调用:
      *
      * <p>  Node accordingNode = ....;
-     * <p>  conditionalContains(mList , new ConditionJudger<Node>() {
+     * <p>  conditionalContains(mList , new ConditionJudger() {
      * <p>      @Override
      * <p>      public boolean isMatchCondition(Node nodeInList) {
      * <p>          return nodeInList.id.equals(accordingObj.id);

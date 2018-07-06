@@ -14,7 +14,7 @@ import android.widget.TextView;
 
 /**
  * 本类是一个页码按钮栏的实现.
- * 和PageBtnBarAdapter配合,可以自定义设置每屏展示的按钮个数,并且自动生成<<和>>按钮,用来切换当前展示的页码按钮.
+ * 和PageBtnBarAdapter配合,可以自定义设置每屏展示的按钮个数,并且自动生成向前翻页和向后翻页按钮,用来切换当前展示的页码按钮.
  * 使用方法为设置adapter后调用refreshPageBar方法刷新按钮栏.
  */
 public class PageBtnBar extends LinearLayout{
@@ -33,6 +33,7 @@ public class PageBtnBar extends LinearLayout{
 
     public PageBtnBar(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs , 0);
+
     }
 
     public PageBtnBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -297,6 +298,7 @@ public class PageBtnBar extends LinearLayout{
 
     /**
      * 设置pageBarAdapter,本类需要设置adapter才能使用,如果不设置adapter就提前调用refreshPageBar方法,则会抛出exception.
+     *
      */
     public PageBtnBar setPageBarAdapter(PageBtnBarAdapter pageBarAdapter) {
         this.mPageBarAdapter = pageBarAdapter;
