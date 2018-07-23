@@ -12,79 +12,161 @@ import android.widget.TextView;
  * Created by FH on 2018/2/27.
  */
 
-public class PageBtnBar extends LinearLayout{
-    private PageBtnBarAdapter mPageBarAdapter;
+/**
+ * 本类是一个页码按钮栏的实现.
+ * 和PageBtnBarAdapter配合,可以自定义设置每屏展示的按钮个数,并且自动生成向前翻页和向后翻页按钮,用来切换当前展示的页码按钮.
+ * 使用方法为设置adapter后调用refreshPageBar方法刷新按钮栏.
+ */
+public class PageBtnBarV2 extends LinearLayout{
+    private PageBtnBarAdapterV2 mPageBarAdapter;
     private int currentSelectPageIndex = -1;
     private int firstBtnIndex = -1;
     private int lastBtnIndex = -1;
 
-    public PageBtnBar(Context context) {
+    //是否允许重复点击某个page按钮.设为false的时候不允许重复点击.默认为false.即不允许重复点击.
+    //这个值主要跟currentSelectPageIndex有关,在触发adapter的OnPageClick方法之前,做一个判断,如果currentSelectPageIndex与点击的PageBtn的index一样,就不触发onPageClick,反之则触发.
+    private boolean repeatedClickEnable = false;
+
+    public PageBtnBarV2(Context context) {
         this(context , null);
     }
 
-    public PageBtnBar(Context context, @Nullable AttributeSet attrs) {
+    public PageBtnBarV2(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs , 0);
+
     }
 
-    public PageBtnBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public PageBtnBarV2(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setGravity(Gravity.CENTER);
     }
 
-    public void setCurrentSelectPageIndex(int index){
-        currentSelectPageIndex = index;
+    /**
+     * 点击某个pageBtn按钮.
+     * 如果pageIndex超过adapter可以提供的总数,或者小于0不合法,则什么都不做.
+     * 如果这个pageBtn不在当前这一屏,则切到有这个pageBtn的这一屏,然后再点击
+     * @param pageIndex 要点击的pageBtn按钮的index
+     */
+    public void clickPageBtn(int pageIndex){
+        if (mPageBarAdapter == null){
+            throw new NoAdapterException("本PageBtnBar没有绑定adapter!调用refreshPageBar之前请先绑定adapter!");
+        }
+        if (pageIndex < 0 || pageIndex >= mPageBarAdapter.getPageBtnCount()){
+            return;
+        }
+        currentSelectPageIndex = pageIndex;
+        if (currentSelectPageIndex < firstBtnIndex || currentSelectPageIndex > lastBtnIndex){
+            firstBtnIndex = currentSelectPageIndex;
+            lastBtnIndex = currentSelectPageIndex;
+        }
+        refreshPageBar(false);
+        boolean needLastScreenBtn = firstBtnIndex != 0 ? true : false;//是否需要显示向前一页的按钮
+        View clickBtn = getChildAt(currentSelectPageIndex - firstBtnIndex + (needLastScreenBtn?1:0));
+        int index = (int) clickBtn.getTag();
+        mPageBarAdapter.onPageBtnClick(clickBtn , index , (String)((TextView) clickBtn).getText());
     }
+
+    /**
+     * 获取当前正在被选中的按钮的index值
+     * @return
+     */
     public int getCurrentSelectPageIndex() {
         return currentSelectPageIndex;
     }
 
     /**
-     * 刷新按钮栏,如果没有设置currentSelectPageIndex,则自动设置第0个按钮为select.
+     * 获取是否允许重复点击某个按钮,默认为false,即不允许重复点击.
+     * @return true为允许重复点击,false为不允许重复点击
+     */
+    public boolean isRepeatedClickEnable() {
+        return repeatedClickEnable;
+    }
+
+    /**
+     * 设置是否允许重复点击某个按钮,例如重复点击1这个page按钮,如果设置了不允许重复点击,
+     * 只有第一次会触发adapter的onPageBtnClick,后续再次点击就不触发了.
+     * @param repeatedClickEnable true为允许重复点击,false为不允许重复点击
+     */
+    public void setRepeatedClickEnable(boolean repeatedClickEnable) {
+        this.repeatedClickEnable = repeatedClickEnable;
+    }
+
+    /**
+     * 刷新按钮栏,默认允许自动点击
      */
     public void refreshPageBar() {
+        refreshPageBar(false);
+    }
+
+    /**
+     * 按照之前的select的按钮和adapter中的数据刷新pagebar.
+     * 本方法的处理了几个特殊情况.
+     * 1.如果没有按钮可供显示,则隐藏pagebar,并触发onNoPageToShow
+     * 2.如果select的按钮已经不存在,则自动选择最后一个按钮,并触发click,并且切到最后一屏按钮
+     * 3.如果没有select的按钮并且有第0个按钮,则自动选择第0个按钮并且触发click,并且切到第一屏按钮.
+     * 4.对于按钮个数变少的当前屏按钮有的变为不存在时,自动调整到最后一屏
+     * 5.对于按钮个数变多导致当前屏按钮数量不足MaxBtnCountPerScreen个时自动调整当前屏按钮数量至最多.
+     * @param disableAutoClick 此参数为true的时候素有自动触发的click全部无效.为false的时候click才有效.
+     *                         默认refreshPageBar方法此参数为false.
+     */
+    public void refreshPageBar(boolean disableAutoClick){
         //没有设置adapter时刷新直接抛出异常
         if (mPageBarAdapter == null){
-            throw new NoAdapterException("本PageBtnBar没有绑定adapter!");
+            throw new NoAdapterException("本PageBtnBar没有绑定adapter!调用refreshPageBar之前请先绑定adapter!");
         }
         int totalPageBtnCount = mPageBarAdapter.getPageBtnCount();//总按钮个数
-        //如果总按钮个数为0,或当前每屏可显示按钮数为0,则移除所有已经存在的按钮,并且把所有变量都初始化,然后刷新结束
+        //如果总按钮个数为0,或当前每屏可显示按钮数为0,则移除所有已经存在的按钮,初始化所有变量,调用onNoPageToShow,然后直接结束刷新.
         if (totalPageBtnCount <= 0 || mPageBarAdapter.getMaxBtnCountPerScreen() <= 0){
             removeAllViews();
             currentSelectPageIndex = -1;
             firstBtnIndex = -1;
             lastBtnIndex = -1;
+            mPageBarAdapter.onNoPageToShow();
             return;
         }
 
         boolean needPerformClick = false;//刷新完成后是否需要自动触发一次当前选中按钮的click事件
 
-        if (currentSelectPageIndex == -1
-                || currentSelectPageIndex >= totalPageBtnCount) {
-            //当前选中按钮超限时,将按钮显示变更为第一屏
-            // ,并且将当前选中按钮置为第一屏
-            // ,并且计划一次自动点击事件.
+        //当前选中index等于-1超限
+        if (currentSelectPageIndex == -1){
             currentSelectPageIndex = 0;
-            firstBtnIndex = -1;
-            lastBtnIndex = -1;
-            toNextScreen();
+            //当前选中index超限时需要调整选中index,因此需要计划一次自动点击
             needPerformClick = true;
-        }
-        else if (lastBtnIndex > (totalPageBtnCount - 1)
-                || firstBtnIndex > (totalPageBtnCount - 1)
-                || lastBtnIndex < 0
-                || firstBtnIndex < 0) {
-            //当firstBtnIndex和lastBtnIndex超限时,将按钮显示变更为第一屏
+            //由于自动更改了选中的index,所以需要自动切换到第一屏
             firstBtnIndex = -1;
             lastBtnIndex = -1;
             toNextScreen();
         }
-
-        //在firstBtnIndex和lastBtnIndex都没有超限时还需要考虑刷新前按钮个数较少,刷新后按钮个数变多了,这时lastBtnIndex可能太小
-        // ,不能满足一屏显示按钮数量最多是MaxBtnCountPerScreen的要求,需要再对lastBtnIndex进行一次校正.
-        if ((lastBtnIndex - firstBtnIndex + 1) < mPageBarAdapter.getMaxBtnCountPerScreen()){
-            lastBtnIndex = firstBtnIndex + mPageBarAdapter.getMaxBtnCountPerScreen() - 1;
-            if (lastBtnIndex >= mPageBarAdapter.getPageBtnCount()){
-                lastBtnIndex = mPageBarAdapter.getPageBtnCount() - 1;
+        //当前选中index大于所有按钮的数量超限
+        else if(currentSelectPageIndex > totalPageBtnCount - 1){
+            currentSelectPageIndex = totalPageBtnCount - 1;
+            //当前选中index超限时需要调整选中index,因此需要计划一次自动点击
+            needPerformClick = true;
+            //由于自动更改了选中的index,所以需要自动切换到最后一屏
+            firstBtnIndex = currentSelectPageIndex + 1;
+            toLastScreen();
+        }
+        //当前选中index没有超限
+        else {
+            //firstBtnIndex和last超下限时,切到第一屏
+            if (firstBtnIndex == -1 || lastBtnIndex == -1){
+                toNextScreen();
+            }
+            //firstBtnIndex和last超上限时,切到最后一屏
+            else if (lastBtnIndex > (totalPageBtnCount - 1)
+                    || firstBtnIndex > (totalPageBtnCount - 1)){
+                firstBtnIndex = totalPageBtnCount;
+                toLastScreen();
+            }
+            else {
+                //在firstBtnIndex和lastBtnIndex都没有超限时还需要考虑刷新前按钮个数较少,刷新后按钮个数变多了,这时lastBtnIndex可能太小
+                // ,不能满足一屏显示按钮数量最多是MaxBtnCountPerScreen的要求,需要再对lastBtnIndex进行一次校正.
+                if ((lastBtnIndex - firstBtnIndex + 1) < mPageBarAdapter.getMaxBtnCountPerScreen()){
+                    lastBtnIndex = firstBtnIndex + mPageBarAdapter.getMaxBtnCountPerScreen() - 1;
+                    if (lastBtnIndex >= mPageBarAdapter.getPageBtnCount()){
+                        lastBtnIndex = mPageBarAdapter.getPageBtnCount() - 1;
+                    }
+                }
             }
         }
 
@@ -145,7 +227,12 @@ public class PageBtnBar extends LinearLayout{
                             refreshPageBar();
                         }
                         else {
-                            //普通按钮点击逻辑,调用PageBarAdapter中用户的onCLick逻辑,并且更新currentSelectPageIndex为当前点击按钮
+                            //普通按钮点击逻辑
+                            if (currentSelectPageIndex == index && !repeatedClickEnable){
+                                //当不支持同一个按钮重复点击时,发现现在点击的按钮与上一个一致,就忽略点击事件.
+                                return;
+                            }
+                            //调用PageBarAdapter中用户的onCLick逻辑,并且更新currentSelectPageIndex为当前点击按钮
                             //并刷新bar
                             currentSelectPageIndex = index;
                             refreshPageBar();
@@ -194,23 +281,33 @@ public class PageBtnBar extends LinearLayout{
             removeViewAt(i);
         }
         //如果需要自动点击当前选中按钮,则根据是否存在向前翻页按钮,计算出当前选中按钮的index,从而获得该按钮,然后模拟点击
-        if (needPerformClick){
+        if (needPerformClick && !disableAutoClick){
             View clickBtn = getChildAt(currentSelectPageIndex - firstBtnIndex + (needLastScreenBtn?1:0));
-            if (clickBtn != null){
-                clickBtn.performClick();
-            }
+            int index = (int) clickBtn.getTag();
+            mPageBarAdapter.onPageBtnClick(clickBtn , index , (String)((TextView) clickBtn).getText());
         }
     }
 
-    public PageBtnBarAdapter getPageBarAdapter() {
+    /**
+     * 获取当前设置的adapter,未设置则为null.
+     * @return
+     */
+    public PageBtnBarAdapterV2 getPageBarAdapter() {
         return mPageBarAdapter;
     }
 
-    public PageBtnBar setPageBarAdapter(PageBtnBarAdapter pageBarAdapter) {
+    /**
+     * 设置pageBarAdapter,本类需要设置adapter才能使用,如果不设置adapter就提前调用refreshPageBar方法,则会抛出exception.
+     *
+     */
+    public PageBtnBarV2 setPageBarAdapter(PageBtnBarAdapterV2 pageBarAdapter) {
         this.mPageBarAdapter = pageBarAdapter;
         return this;
     }
 
+    /**
+     * 未设置adapter的exception
+     */
     public class NoAdapterException extends RuntimeException{
         public NoAdapterException(String message) {
             super(message);

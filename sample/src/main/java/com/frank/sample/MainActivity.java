@@ -4,11 +4,10 @@ import android.app.Activity;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
-import com.frank.etude.pageable.PageBtnBarAdapter;
+import com.frank.etude.pageable.PageBtnBarAdapterV2;
 import com.frank.sample.databinding.ActivityTestBinding;
 
 /**
@@ -27,7 +26,7 @@ public class MainActivity extends Activity{
 
     public View layout() {
         binding = DataBindingUtil.inflate(LayoutInflater.from(this) , R.layout.activity_test , null , false);
-        binding.btnBar.setPageBarAdapter(new PageBtnBarAdapter(getApplicationContext()) {
+        binding.btnBar.setPageBarAdapter(new PageBtnBarAdapterV2(getApplicationContext()) {
             @Override
             public int getPageBtnCount() {
                 return totalCount;

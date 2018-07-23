@@ -42,7 +42,7 @@ import android.widget.LinearLayout;
 
 public class PageableRecyclerView extends LinearLayout {
     RecyclerView recyclerView;
-    PageBtnBar pageBtnBar;
+    PageBtnBarV2 pageBtnBarV2;
 
     private int maxItemNumInOnePage = 0;
     private Adapter customAdapter;
@@ -72,16 +72,16 @@ public class PageableRecyclerView extends LinearLayout {
 
             @Override
             public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-                position = position + pageBtnBar.getCurrentSelectPageIndex() * maxItemNumInOnePage;
+                position = position + pageBtnBarV2.getCurrentSelectPageIndex() * maxItemNumInOnePage;
                 customAdapter.onBindViewHolder(holder , position);
             }
 
             @Override
             public int getItemCount() {
-                if (customAdapter == null || pageBtnBar.getCurrentSelectPageIndex() == -1){
+                if (customAdapter == null || pageBtnBarV2.getCurrentSelectPageIndex() == -1){
                     return 0;
                 }
-                int temp = customAdapter.getItemCount() - pageBtnBar.getCurrentSelectPageIndex() * maxItemNumInOnePage;
+                int temp = customAdapter.getItemCount() - pageBtnBarV2.getCurrentSelectPageIndex() * maxItemNumInOnePage;
                 if (temp > maxItemNumInOnePage){
                     return maxItemNumInOnePage;
                 }
@@ -90,8 +90,8 @@ public class PageableRecyclerView extends LinearLayout {
         });
         LayoutParams rcvParam = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0 , 1);
         addView(recyclerView, rcvParam);
-        pageBtnBar = new PageBtnBar(getContext());
-        pageBtnBar.setPageBarAdapter(new PageBtnBarAdapter(getContext()) {
+        pageBtnBarV2 = new PageBtnBarV2(getContext());
+        pageBtnBarV2.setPageBarAdapter(new PageBtnBarAdapterV2(getContext()) {
             @Override
             public int getPageBtnCount() {
                 if (customAdapter == null || maxItemNumInOnePage == 0){
@@ -116,7 +116,7 @@ public class PageableRecyclerView extends LinearLayout {
             }
         });
         LayoutParams pageBtnContainerParam = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        addView(pageBtnBar , pageBtnContainerParam);
+        addView(pageBtnBarV2, pageBtnContainerParam);
     }
 
     public PageableRecyclerView setMaxItemNumInOnePage(int maxItemNumInOnePage) {
@@ -145,14 +145,14 @@ public class PageableRecyclerView extends LinearLayout {
      * @param pageIndex
      */
     public void showPage(int pageIndex){
-        pageBtnBar.clickPageBtn(pageIndex);
+        pageBtnBarV2.clickPageBtn(pageIndex);
     }
 
     public void notifyDataSetChanged() {
         if (customAdapter == null){
             throw new NoAdapterException("没有设置adapter!!!调用notifyDataSetChanged之前必须设置一个adapter");
         }
-        int currentIndex = pageBtnBar.getCurrentSelectPageIndex();
+        int currentIndex = pageBtnBarV2.getCurrentSelectPageIndex();
         if (currentIndex == -1){
             currentIndex = 0;
         }
@@ -173,7 +173,7 @@ public class PageableRecyclerView extends LinearLayout {
     }
 
     public int getCurrentSelectPageIndex(){
-        return pageBtnBar.getCurrentSelectPageIndex();
+        return pageBtnBarV2.getCurrentSelectPageIndex();
     }
 
 
@@ -197,9 +197,9 @@ public class PageableRecyclerView extends LinearLayout {
         public abstract boolean isPageDataReady(int pageIndex);
         public abstract void preparePageData(int pageIndex);
         public void notifyDataReady(){
-            int currentPageIndex = pageableRecyclerView.pageBtnBar.getCurrentSelectPageIndex();
-            pageableRecyclerView.pageBtnBar.refreshPageBar();
-            if (currentPageIndex == pageableRecyclerView.pageBtnBar.getCurrentSelectPageIndex()){
+            int currentPageIndex = pageableRecyclerView.pageBtnBarV2.getCurrentSelectPageIndex();
+            pageableRecyclerView.pageBtnBarV2.refreshPageBar();
+            if (currentPageIndex == pageableRecyclerView.pageBtnBarV2.getCurrentSelectPageIndex()){
                 pageableRecyclerView.getRealRcyView().getAdapter().notifyDataSetChanged();
             }
         }
