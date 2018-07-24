@@ -190,8 +190,8 @@ public class PageBtnBar extends LinearLayout{
             }
         }
         //如果btnbar中还有其他不被需要的按钮,全部移除
-        for (int i = needBtnCount ; i < getChildCount() ;i++){
-            removeViewAt(i);
+        while (getChildCount() > needBtnCount){
+            removeViewAt(needBtnCount);
         }
         //如果需要自动点击当前选中按钮,则根据是否存在向前翻页按钮,计算出当前选中按钮的index,从而获得该按钮,然后模拟点击
         if (needPerformClick){
