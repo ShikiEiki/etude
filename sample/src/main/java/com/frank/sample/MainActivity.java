@@ -33,7 +33,7 @@ public class MainActivity extends Activity{
             }
 
             @Override
-            public void onPageBtnClick(View btn, int btnIndex, String textInBtn) {
+            public void onPageBtnClick(View btn, int btnIndex, String textInBtn , int lastSelectPageBtnIndex) {
                 binding.textview.setText(textInBtn);
             }
 

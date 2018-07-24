@@ -54,6 +54,7 @@ public class PageBtnBarV2 extends LinearLayout{
         if (pageIndex < 0 || pageIndex >= mPageBarAdapter.getPageBtnCount()){
             return;
         }
+        int lastSelectPageIndex = currentSelectPageIndex;
         currentSelectPageIndex = pageIndex;
         if (currentSelectPageIndex < firstBtnIndex || currentSelectPageIndex > lastBtnIndex){
             firstBtnIndex = currentSelectPageIndex;
@@ -63,7 +64,7 @@ public class PageBtnBarV2 extends LinearLayout{
         boolean needLastScreenBtn = firstBtnIndex != 0 ? true : false;//是否需要显示向前一页的按钮
         View clickBtn = getChildAt(currentSelectPageIndex - firstBtnIndex + (needLastScreenBtn?1:0));
         int index = (int) clickBtn.getTag();
-        mPageBarAdapter.onPageBtnClick(clickBtn , index , (String)((TextView) clickBtn).getText());
+        mPageBarAdapter.onPageBtnClick(clickBtn , index , (String)((TextView) clickBtn).getText() , lastSelectPageIndex);
     }
 
     /**
@@ -126,7 +127,7 @@ public class PageBtnBarV2 extends LinearLayout{
         }
 
         boolean needPerformClick = false;//刷新完成后是否需要自动触发一次当前选中按钮的click事件
-
+        int lastSelectPageIndex = currentSelectPageIndex;
         //当前选中index等于-1超限
         if (currentSelectPageIndex == -1){
             currentSelectPageIndex = 0;
@@ -234,9 +235,10 @@ public class PageBtnBarV2 extends LinearLayout{
                             }
                             //调用PageBarAdapter中用户的onCLick逻辑,并且更新currentSelectPageIndex为当前点击按钮
                             //并刷新bar
+                            int lastSelectPageIndex = currentSelectPageIndex;
                             currentSelectPageIndex = index;
                             refreshPageBar();
-                            mPageBarAdapter.onPageBtnClick(v , index , (String)((TextView) v).getText());
+                            mPageBarAdapter.onPageBtnClick(v , index , (String)((TextView) v).getText() , lastSelectPageIndex);
                         }
                     }
                 });
@@ -284,7 +286,7 @@ public class PageBtnBarV2 extends LinearLayout{
         if (needPerformClick && !disableAutoClick){
             View clickBtn = getChildAt(currentSelectPageIndex - firstBtnIndex + (needLastScreenBtn?1:0));
             int index = (int) clickBtn.getTag();
-            mPageBarAdapter.onPageBtnClick(clickBtn , index , (String)((TextView) clickBtn).getText());
+            mPageBarAdapter.onPageBtnClick(clickBtn , index , (String)((TextView) clickBtn).getText() , lastSelectPageIndex);
         }
     }
 

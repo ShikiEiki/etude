@@ -101,7 +101,7 @@ public class PageableRecyclerView extends LinearLayout {
             }
 
             @Override
-            public void onPageBtnClick(View view, int index, String textInPageBtn) {
+            public void onPageBtnClick(View view, int index, String textInPageBtn , int lastSelectedPageBtnIndex) {
                 if (customAdapter.isPageDataReady(index)){
                     customAdapter.notifyDataReady();
                 }

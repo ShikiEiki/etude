@@ -80,7 +80,7 @@ public abstract class PageBtnBarAdapterV2 {
      * @param btnIndex 被按下的按钮在所有按钮中的index
      * @param textInBtn 被按下的按钮的文字
      */
-    public abstract void onPageBtnClick(View btn, int btnIndex, String textInBtn);
+    public abstract void onPageBtnClick(View btn, int btnIndex, String textInBtn , int lastSelectPageBtnIndex);
 
     /**
      * refreshPageBtnBar时发现没有一个按钮可以展示,则会回调此方法.
