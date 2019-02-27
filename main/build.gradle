@@ -2,12 +2,11 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'//bintray库上传插件
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    compileSdkVersion 27
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 22
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
 
@@ -23,20 +22,20 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.+'
-    compile 'com.android.support:recyclerview-v7:25.+'
-    testCompile 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:27.+'
+    implementation 'com.android.support:recyclerview-v7:27.+'
+    testImplementation 'junit:junit:4.12'
 }
 
 publish {
     userOrg = 'shikieiki'//bintray.com用户名
     groupId = 'com.frank'//jcenter上的路径
     artifactId = 'etude'//项目名称
-    publishVersion = '1.2.4.1'//版本号
+    publishVersion = '1.2.4.2'//版本号
     desc = 'An android tools kit created by FuHan'//描述
     website = 'https://github.com/shikieiki'//网站，不重要；尽量模拟github上的地址
 }
